@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📓 Not Defterim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F2F2F7;
+    --card:      #FFFFFF;
+    --surface:   #EFEFF4;
+    --border:    #D1D1D6;
+    --text:      #1C1C1E;
+    --text2:     #3A3A3C;
+    --text3:     #8E8E93;
+    --accent:    #4A90D9;
+    --green:     #34C759;
+    --orange:    #FF9500;
+    --red:       #FF3B30;
+    --radius:    14px;
+    --shadow:    0 2px 12px rgba(0,0,0,.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ─────────────────────────────────────────── */
+  nav {
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    padding: 0 20px;
+  }
+  .nav-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    height: 60px;
+  }
+  .nav-title {
+    font-size: 1.25rem; font-weight: 800;
+    flex: 1;
+  }
+  .btn-add {
+    background: var(--accent);
+    color: #fff;
+    border: none; cursor: pointer;
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-family: inherit; font-size: .9rem; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform .12s, box-shadow .12s;
+    box-shadow: 0 3px 10px rgba(74,144,217,.35);
+  }
+  .btn-add:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(74,144,217,.45); }
+  .btn-add:active { transform: scale(.97); }
+  .btn-add svg { width:16px; height:16px; stroke: currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; }
+
+  /* ── MAIN WRAP ───────────────────────────────────── */
+  main { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+
+  /* ── SEARCH ──────────────────────────────────────── */
+  .search-wrap {
+    position: relative; margin-bottom: 14px;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 17px; height: 17px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round;
+    pointer-events: none;
+  }
+  #search {
+    width: 100%; padding: 10px 14px 10px 38px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); font-family: inherit;
+    font-size: .95rem; color: var(--text);
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  #search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,144,217,.15); }
+  #search::placeholder { color: var(--text3); }
+
+  /* ── FILTER CHIPS ────────────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 8px; margin-bottom: 20px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    padding: 6px 16px; border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font-family: inherit; font-size: .85rem; font-weight: 600;
+    cursor: pointer; color: var(--text2);
+    transition: all .15s;
+  }
+  .chip.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(74,144,217,.3);
+  }
+
+  /* ── ITEM LIST ───────────────────────────────────── */
+  #list { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── ITEM CARD ───────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    animation: slideIn .25s ease both;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+  .card:active { transform: scale(.99); }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-stripe {
+    width: 5px; flex-shrink: 0;
+  }
+  .card-body {
+    flex: 1; padding: 14px 14px 14px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge {
+    font-size: .7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 50px;
+  }
+  .pin-icon {
+    font-size: .75rem; color: var(--orange);
+  }
+  .card-actions { margin-left: auto; display: flex; gap: 4px; }
+
+  .card-title {
+    font-size: 1rem; font-weight: 700; line-height: 1.35;
+  }
+  .card-title.done { text-decoration: line-through; color: var(--text3); }
+
+  .card-text {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: .87rem; color: var(--text3);
+    line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+    transition: -webkit-line-clamp .2s;
+  }
+  .card-text.expanded { -webkit-line-clamp: unset; }
+
+  .card-date {
+    font-size: .72rem; color: var(--border);
+    margin-top: 2px;
+  }
+
+  /* Icon buttons inside card */
+  .icon-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 4px; border-radius: 8px;
+    color: var(--text3); font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
+  }
+  .icon-btn:hover { background: var(--surface); color: var(--text); }
+  .icon-btn.check.done { color: var(--green); }
+  .icon-btn.delete:hover { color: var(--red); }
+  .icon-btn.pin.pinned { color: var(--orange); }
+
+  /* ── PIN LOCK SCREEN ─────────────────────────────── */
+  #lock-screen {
+    position: fixed; inset: 0; z-index: 999;
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0;
+    transition: opacity .35s, transform .35s;
+  }
+  #lock-screen.hidden {
+    opacity: 0; transform: scale(1.04);
+    pointer-events: none;
+  }
+
+  .lock-icon {
+    font-size: 3rem; margin-bottom: 10px;
+    animation: lockPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes lockPulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
+  }
+
+  .lock-title {
+    font-size: 1.5rem; font-weight: 800;
+    color: #fff; margin-bottom: 4px;
+  }
+  .lock-subtitle {
+    font-size: .9rem; color: rgba(255,255,255,.5);
+    margin-bottom: 40px; text-align: center; padding: 0 20px;
+  }
+
+  /* PIN dots */
+  .pin-dots {
+    display: flex; gap: 16px; margin-bottom: 36px;
+  }
+  .pin-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4);
+    background: transparent;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .pin-dot.filled {
+    background: #fff;
+    border-color: #fff;
+    transform: scale(1.1);
+  }
+  .pin-dot.error {
+    background: #FF3B30;
+    border-color: #FF3B30;
+    animation: shake .4s ease;
+  }
+  .pin-dot.success {
+    background: #34C759;
+    border-color: #34C759;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  .lock-message {
+    height: 20px; font-size: .82rem;
+    color: #FF3B30; margin-bottom: 28px;
+    font-weight: 600; text-align: center;
+    opacity: 0; transition: opacity .2s;
+  }
+  .lock-message.show { opacity: 1; }
+
+  /* Numpad */
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 72px);
+    grid-template-rows: repeat(4, 72px);
+    gap: 14px;
+  }
+  .num-btn {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.4rem; font-weight: 700;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    line-height: 1;
+    transition: transform .1s, background .15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .num-btn:not(.clear-btn):not(.del-btn) {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    backdrop-filter: blur(8px);
+  }
+  .num-btn:not(.clear-btn):not(.del-btn):hover {
+    background: rgba(255,255,255,.18);
+  }
+  .num-btn:not(.clear-btn):not(.del-btn):active {
+    transform: scale(.9);
+    background: rgba(255,255,255,.3);
+  }
+  .num-btn .num-letters {
+    font-size: .5rem; font-weight: 600;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.45);
+    margin-top: 2px;
+  }
+  .del-btn {
+    background: transparent; color: rgba(255,255,255,.7);
+    font-size: 1.6rem;
+  }
+  .del-btn:hover { color: #fff; }
+  .del-btn:active { transform: scale(.9); }
+  .clear-btn { background: transparent; } /* empty slot */
+
+  /* Forgot / Change PIN link */
+  .lock-footer {
+    margin-top: 32px; display: flex; gap: 24px;
+  }
+  .lock-link {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,.45); font-family: inherit;
+    font-size: .82rem; font-weight: 600;
+    transition: color .15s;
+  }
+  .lock-link:hover { color: rgba(255,255,255,.8); }
+
+  /* Setup flow */
+  .lock-step-indicator {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .step-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    transition: background .2s;
+  }
+  .step-dot.active { background: #fff; }
+
+  /* ── EMPTY STATE ──────────────────────────────────── */
+  #empty {
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 80px 20px; text-align: center; gap: 10px;
+    color: var(--text3);
+  }
+  #empty .icon { font-size: 3.5rem; }
+  #empty h3 { font-size: 1.15rem; color: var(--text2); }
+  #empty p  { font-size: .9rem; }
+
+  /* ── MODAL OVERLAY ───────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  /* ── MODAL SHEET ─────────────────────────────────── */
+  .sheet {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 720px;
+    padding: 0 0 40px;
+    transform: translateY(60px);
+    transition: transform .25s cubic-bezier(.32,1.2,.5,1);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .overlay.open .sheet { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px; height: 4px;
+    background: var(--border); border-radius: 2px;
+    margin: 12px auto 20px;
+  }
+  .sheet-title {
+    padding: 0 20px 16px;
+    font-size: 1.15rem; font-weight: 800;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Form elements */
+  .form-section { padding: 16px 20px 0; }
+  .form-label {
+    font-size: .8rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 8px; display: block;
+  }
+  .seg {
+    display: flex; gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .seg-btn {
+    flex: 1; padding: 9px;
+    border: none; background: var(--card);
+    font-family: inherit; font-size: .9rem; font-weight: 700;
+    cursor: pointer; color: var(--text3);
+    transition: all .15s;
+  }
+  .seg-btn:not(:last-child) { border-right: 1.5px solid var(--border); }
+  .seg-btn.active { background: var(--accent); color: #fff; }
+
+  .form-input, .form-textarea {
+    width: 100%; padding: 11px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit; font-size: .95rem; color: var(--text);
+    background: var(--bg); outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    resize: none;
+  }
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74,144,217,.15);
+    background: var(--card);
+  }
+  .form-textarea { min-height: 110px; line-height: 1.6; }
+
+  /* Color Picker */
+  .color-grid {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .color-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    cursor: pointer; position: relative;
+    transition: transform .15s;
+    border: 2.5px solid transparent;
+  }
+  .color-dot:hover { transform: scale(1.12); }
+  .color-dot.selected { border-color: var(--text); }
+  .color-dot.selected::after {
+    content: '✓';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 900; color: #fff;
+  }
+
+  /* Form Footer */
+  .sheet-footer {
+    display: flex; gap: 10px;
+    padding: 20px 20px 0;
+  }
+  .btn {
+    flex: 1; padding: 13px;
+    border: none; border-radius: 12px;
+    font-family: inherit; font-size: .95rem; font-weight: 800;
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-cancel {
+    background: var(--surface); color: var(--text2);
+  }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-save {
+    background: var(--accent); color: #fff;
+    box-shadow: 0 3px 10px rgba(74,144,217,.35);
+  }
+  .btn-save:hover { filter: brightness(1.08); box-shadow: 0 5px 16px rgba(74,144,217,.45); }
+  .btn-save:disabled { opacity: .45; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- ── PIN LOCK SCREEN ──────────────────────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-icon" id="lock-icon">🔒</div>
+  <div class="lock-title" id="lock-title">Not Defterim</div>
+  <div class="lock-subtitle" id="lock-subtitle">PIN kodunuzu girin</div>
+
+  <div class="lock-step-indicator" id="step-indicator" style="display:none">
+    <div class="step-dot active" id="sd0"></div>
+    <div class="step-dot" id="sd1"></div>
+  </div>
+
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+    <div class="pin-dot" id="pd4"></div>
+    <div class="pin-dot" id="pd5"></div>
+  </div>
+
+  <div class="lock-message" id="lock-msg"></div>
+
+  <div class="numpad">
+    <button class="num-btn" onclick="numPress('1')">1<span class="num-letters"></span></button>
+    <button class="num-btn" onclick="numPress('2')">2<span class="num-letters">ABC</span></button>
+    <button class="num-btn" onclick="numPress('3')">3<span class="num-letters">DEF</span></button>
+    <button class="num-btn" onclick="numPress('4')">4<span class="num-letters">GHI</span></button>
+    <button class="num-btn" onclick="numPress('5')">5<span class="num-letters">JKL</span></button>
+    <button class="num-btn" onclick="numPress('6')">6<span class="num-letters">MNO</span></button>
+    <button class="num-btn" onclick="numPress('7')">7<span class="num-letters">PQRS</span></button>
+    <button class="num-btn" onclick="numPress('8')">8<span class="num-letters">TUV</span></button>
+    <button class="num-btn" onclick="numPress('9')">9<span class="num-letters">WXYZ</span></button>
+    <div class="num-btn clear-btn"></div>
+    <button class="num-btn" onclick="numPress('0')">0</button>
+    <button class="num-btn del-btn" onclick="numDel()">⌫</button>
+  </div>
+
+  <div class="lock-footer">
+    <button class="lock-link" id="forgot-btn" onclick="forgotPIN()">PIN'i sıfırla</button>
+    <button class="lock-link" id="change-btn" onclick="changePIN()" style="display:none">PIN'i değiştir</button>
+  </div>
+</div>
+
+<!-- ── NAV ────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-title">📓 Not Defterim</span>
+    <button class="btn-add" onclick="openForm()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Yeni Ekle
+    </button>
+    <button class="btn-add" style="background:rgba(0,0,0,.08);color:var(--text2);box-shadow:none;padding:8px 12px" onclick="changePIN()" title="PIN Değiştir">🔒</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ───────────────────────────────────────────────── -->
+<main>
+  <!-- Search -->
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="search" type="text" placeholder="Ara..." oninput="render()">
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <button class="chip active" data-filter="all"   onclick="setFilter('all',this)">Tümü</button>
+    <button class="chip"        data-filter="note"  onclick="setFilter('note',this)">📝 Notlar</button>
+    <button class="chip"        data-filter="task"  onclick="setFilter('task',this)">✅ Görevler</button>
+  </div>
+
+  <!-- List -->
+  <div id="list"></div>
+  <div id="empty">
+    <div class="icon">🗒️</div>
+    <h3>Henüz hiç öğe yok</h3>
+    <p>Sağ üstteki "Yeni Ekle" butonuna basarak başlayın</p>
+  </div>
+</main>
+
+<!-- ── MODAL ───────────────────────────────────────────────── -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="modal-title">Yeni Öğe</div>
+
+    <!-- Tür -->
+    <div class="form-section">
+      <label class="form-label">Tür</label>
+      <div class="seg">
+        <button class="seg-btn active" data-type="note"  onclick="setType('note',this)">📝 Not</button>
+        <button class="seg-btn"        data-type="task"  onclick="setType('task',this)">✅ Görev</button>
+      </div>
+    </div>
+
+    <!-- İçerik -->
+    <div class="form-section">
+      <label class="form-label">Başlık</label>
+      <input  id="f-title"  class="form-input"    type="text"  placeholder="Başlık girin..." oninput="checkSave()">
+    </div>
+    <div class="form-section">
+      <label class="form-label">Açıklama</label>
+      <textarea id="f-body" class="form-textarea" placeholder="İçeriği buraya yazın..."></textarea>
+    </div>
+
+    <!-- Renk -->
+    <div class="form-section">
+      <label class="form-label">Renk</label>
+      <div class="color-grid" id="color-grid"></div>
+    </div>
+
+    <!-- Butonlar -->
+    <div class="sheet-footer">
+      <button class="btn btn-cancel" onclick="closeForm()">İptal</button>
+      <button class="btn btn-save"   id="save-btn" disabled onclick="saveItem()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────
+const COLORS = [
+  { name:'Mavi',    hex:'4A90D9' },
+  { name:'Yeşil',   hex:'5CB85C' },
+  { name:'Turuncu', hex:'E8813A' },
+  { name:'Mor',     hex:'9B59B6' },
+  { name:'Kırmızı', hex:'E74C3C' },
+  { name:'Sarı',    hex:'F1C40F' },
+];
+
+let items = JSON.parse(localStorage.getItem('notdefterim') || '[]');
+let filterType = 'all';
+let editingId  = null;
+let formType   = 'note';
+let formColor  = '4A90D9';
+
+function save() {
+  localStorage.setItem('notdefterim', JSON.stringify(items));
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+// ── Filter ──────────────────────────────────────────────────
+function setFilter(f, btn) {
+  filterType = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── Render ──────────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  return items
+    .filter(it => filterType === 'all' || it.type === filterType)
+    .filter(it => !q || it.title.toLowerCase().includes(q) || it.body.toLowerCase().includes(q))
+    .sort((a,b) => (b.pinned - a.pinned) || (b.createdAt - a.createdAt));
+}
+
+function formatDate(ts) {
+  return new Date(ts).toLocaleString('tr-TR', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const filtered = getFiltered();
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = filtered.map(it => {
+    const color = it.color;
+    const badge = it.type === 'note'
+      ? `<span class="badge" style="background:${hexAlpha(color,.12)};color:#${color}">📝 Not</span>`
+      : `<span class="badge" style="background:${hexAlpha(color,.12)};color:#${color}">✅ Görev</span>`;
+
+    const pin = it.pinned ? `<span class="pin-icon" title="Sabitlenmiş">📌</span>` : '';
+
+    const checkBtn = it.type === 'task'
+      ? `<button class="icon-btn check ${it.done?'done':''}" title="${it.done?'Geri al':'Tamamla'}" onclick="event.stopPropagation();toggleDone('${it.id}')">
+           ${it.done ? '✅' : '⭕'}
+         </button>` : '';
+
+    const text = it.body
+      ? `<div class="card-text" id="ct-${it.id}" onclick="event.stopPropagation();toggleExpand('${it.id}')">${escape(it.body)}</div>` : '';
+
+    return `
+    <div class="card" onclick="openForm('${it.id}')">
+      <div class="card-stripe" style="background:#${color}"></div>
+      <div class="card-body">
+        <div class="card-header">
+          ${badge}${pin}
+          <div class="card-actions">
+            ${checkBtn}
+            <button class="icon-btn pin ${it.pinned?'pinned':''}" title="${it.pinned?'Sabiti Kaldır':'Sabitle'}" onclick="event.stopPropagation();togglePin('${it.id}')">📌</button>
+            <button class="icon-btn delete" title="Sil" onclick="event.stopPropagation();deleteItem('${it.id}')">🗑️</button>
+          </div>
+        </div>
+        <div class="card-title ${it.done&&it.type==='task'?'done':''}">${escape(it.title)}</div>
+        ${text}
+        <div class="card-date">${formatDate(it.createdAt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hexAlpha(hex, a) {
+  const r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function escape(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleExpand(id) {
+  const el = document.getElementById('ct-'+id);
+  if (el) el.classList.toggle('expanded');
+}
+
+// ── Actions ─────────────────────────────────────────────────
+function toggleDone(id) {
+  const it = items.find(x=>x.id===id);
+  if (it) { it.done = !it.done; save(); render(); }
+}
+function togglePin(id) {
+  const it = items.find(x=>x.id===id);
+  if (it) { it.pinned = !it.pinned; save(); render(); }
+}
+function deleteItem(id) {
+  if (!confirm('Bu öğeyi silmek istiyor musunuz?')) return;
+  items = items.filter(x=>x.id!==id);
+  save(); render();
+}
+
+// ── Form ────────────────────────────────────────────────────
+function buildColorGrid() {
+  const grid = document.getElementById('color-grid');
+  grid.innerHTML = COLORS.map(c => `
+    <div class="color-dot ${c.hex===formColor?'selected':''}"
+         style="background:#${c.hex}"
+         onclick="selectColor('${c.hex}')">
+    </div>`).join('');
+}
+
+function selectColor(hex) {
+  formColor = hex;
+  document.querySelectorAll('.color-dot').forEach((d,i) => {
+    d.classList.toggle('selected', COLORS[i].hex === hex);
+  });
+}
+
+function setType(t, btn) {
+  formType = t;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function openForm(id) {
+  editingId = id || null;
+  const overlay = document.getElementById('overlay');
+
+  // Reset form
+  formType  = 'note';
+  formColor = '4A90D9';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-body').value  = '';
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.seg-btn[data-type="note"]').classList.add('active');
+  document.getElementById('modal-title').textContent = 'Yeni Öğe';
+  document.getElementById('save-btn').textContent = 'Ekle';
+
+  if (id) {
+    const it = items.find(x=>x.id===id);
+    if (it) {
+      formType  = it.type;
+      formColor = it.color;
+      document.getElementById('f-title').value = it.title;
+      document.getElementById('f-body').value  = it.body;
+      document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.seg-btn[data-type="${it.type}"]`).classList.add('active');
+      document.getElementById('modal-title').textContent = 'Düzenle';
+      document.getElementById('save-btn').textContent = 'Kaydet';
+    }
+  }
+
+  buildColorGrid();
+  checkSave();
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('f-title').focus(), 250);
+}
+
+function closeForm() {
+  document.getElementById('overlay').classList.remove('open');
+  editingId = null;
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeForm();
+}
+
+function checkSave() {
+  const v = document.getElementById('f-title').value.trim();
+  document.getElementById('save-btn').disabled = !v;
+}
+
+function saveItem() {
+  const title = document.getElementById('f-title').value.trim();
+  const body  = document.getElementById('f-body').value.trim();
+  if (!title) return;
+
+  if (editingId) {
+    const it = items.find(x=>x.id===editingId);
+    if (it) { it.title=title; it.body=body; it.type=formType; it.color=formColor; }
+  } else {
+    items.unshift({ id:uid(), title, body, type:formType, color:formColor, done:false, pinned:false, createdAt:Date.now() });
+  }
+
+  save(); closeForm(); render();
+}
+
+// Keyboard shortcut: Ctrl/Cmd+N → new item
+document.addEventListener('keydown', e => {
+  if ((e.metaKey||e.ctrlKey) && e.key==='n') { e.preventDefault(); openForm(); }
+  if (e.key==='Escape') closeForm();
+});
+
+// ── PIN Logic ────────────────────────────────────────────────
+const PIN_KEY      = 'notdefterim_pin';
+const FAIL_KEY     = 'notdefterim_fails';
+const LOCK_KEY     = 'notdefterim_lockuntil';
+const MAX_FAILS    = 5;
+const LOCK_SECS    = 30;
+
+let pinBuffer   = '';
+let pinSetup1   = '';  // first entry during setup
+let lockMode    = 'unlock'; // 'unlock' | 'setup1' | 'setup2' | 'change_verify' | 'change_new1' | 'change_new2'
+
+function getPin()       { return localStorage.getItem(PIN_KEY); }
+function setPin(p)      { localStorage.setItem(PIN_KEY, p); }
+function getFails()     { return parseInt(localStorage.getItem(FAIL_KEY)||'0'); }
+function setFails(n)    { localStorage.setItem(FAIL_KEY, n); }
+function getLockUntil() { return parseInt(localStorage.getItem(LOCK_KEY)||'0'); }
+function setLockUntil(t){ localStorage.setItem(LOCK_KEY, t); }
+
+function updateDots() {
+  for (let i=0;i<6;i++) {
+    const d = document.getElementById('pd'+i);
+    d.classList.toggle('filled', i < pinBuffer.length);
+    d.classList.remove('error','success');
+  }
+}
+
+function showMsg(txt, type='error') {
+  const el = document.getElementById('lock-msg');
+  el.textContent = txt;
+  el.classList.add('show');
+  if (type === 'temp') setTimeout(() => el.classList.remove('show'), 2000);
+}
+function hideMsg() {
+  document.getElementById('lock-msg').classList.remove('show');
+}
+
+function flashDots(type) {
+  return new Promise(res => {
+    for(let i=0;i<6;i++) {
+      const d = document.getElementById('pd'+i);
+      d.classList.remove('filled');
+      d.classList.add(type);
+    }
+    setTimeout(() => {
+      for(let i=0;i<6;i++) {
+        document.getElementById('pd'+i).classList.remove(type);
+      }
+      res();
+    }, 600);
+  });
+}
+
+function checkLock() {
+  const until = getLockUntil();
+  if (until && Date.now() < until) {
+    const secs = Math.ceil((until - Date.now()) / 1000);
+    showMsg(`Çok fazla deneme. ${secs}sn bekleyin.`);
+    return true;
+  }
+  return false;
+}
+
+// Countdown timer while locked
+let lockTimer = null;
+function startLockCountdown(until) {
+  if (lockTimer) clearInterval(lockTimer);
+  lockTimer = setInterval(() => {
+    if (Date.now() >= until) {
+      clearInterval(lockTimer);
+      hideMsg();
+      setLockUntil(0); setFails(0);
+    } else {
+      const secs = Math.ceil((until - Date.now()) / 1000);
+      showMsg(`Çok fazla deneme. ${secs}sn bekleyin.`);
+    }
+  }, 500);
+}
+
+function numPress(n) {
+  if (checkLock()) return;
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += n;
+  updateDots();
+  if (pinBuffer.length === 6) {
+    setTimeout(() => handlePinComplete(), 80);
+  }
+}
+
+function numDel() {
+  if (pinBuffer.length === 0) return;
+  pinBuffer = pinBuffer.slice(0,-1);
+  updateDots();
+}
+
+async function handlePinComplete() {
+  const entered = pinBuffer;
+  pinBuffer = '';
+
+  if (lockMode === 'unlock') {
+    const stored = getPin();
+    if (entered === stored) {
+      setFails(0);
+      await flashDots('success');
+      unlockApp();
+    } else {
+      await flashDots('error');
+      const fails = getFails() + 1;
+      setFails(fails);
+      const remaining = MAX_FAILS - fails;
+      if (fails >= MAX_FAILS) {
+        const until = Date.now() + LOCK_SECS * 1000;
+        setLockUntil(until);
+        startLockCountdown(until);
+      } else {
+        showMsg(`Yanlış PIN. ${remaining} deneme kaldı.`, 'temp');
+      }
+      updateDots();
+    }
+
+  } else if (lockMode === 'setup1') {
+    pinSetup1 = entered;
+    lockMode = 'setup2';
+    document.getElementById('lock-subtitle').textContent = 'PIN\'i tekrar girin';
+    document.getElementById('sd0').classList.remove('active');
+    document.getElementById('sd1').classList.add('active');
+    hideMsg();
+    updateDots();
+
+  } else if (lockMode === 'setup2') {
+    if (entered === pinSetup1) {
+      setPin(entered);
+      await flashDots('success');
+      if (document.getElementById('step-indicator').style.display !== 'none') {
+        document.getElementById('step-indicator').style.display = 'none';
+      }
+      unlockApp();
+    } else {
+      await flashDots('error');
+      showMsg('PIN\'ler eşleşmedi. Tekrar deneyin.', 'temp');
+      pinSetup1 = '';
+      lockMode = 'setup1';
+      document.getElementById('lock-subtitle').textContent = 'Yeni bir 6 haneli PIN oluşturun';
+      document.getElementById('sd0').classList.add('active');
+      document.getElementById('sd1').classList.remove('active');
+      updateDots();
+    }
+
+  } else if (lockMode === 'change_verify') {
+    if (entered === getPin()) {
+      lockMode = 'change_new1';
+      pinSetup1 = '';
+      document.getElementById('lock-subtitle').textContent = 'Yeni PIN\'i girin';
+      document.getElementById('step-indicator').style.display = 'flex';
+      document.getElementById('sd0').classList.add('active');
+      document.getElementById('sd1').classList.remove('active');
+      hideMsg();
+    } else {
+      await flashDots('error');
+      showMsg('Mevcut PIN yanlış.', 'temp');
+    }
+    updateDots();
+
+  } else if (lockMode === 'change_new1') {
+    pinSetup1 = entered;
+    lockMode = 'change_new2';
+    document.getElementById('lock-subtitle').textContent = 'Yeni PIN\'i tekrar girin';
+    document.getElementById('sd0').classList.remove('active');
+    document.getElementById('sd1').classList.add('active');
+    hideMsg(); updateDots();
+
+  } else if (lockMode === 'change_new2') {
+    if (entered === pinSetup1) {
+      setPin(entered);
+      await flashDots('success');
+      exitLockScreen();
+    } else {
+      await flashDots('error');
+      showMsg('PIN\'ler eşleşmedi.', 'temp');
+      pinSetup1 = '';
+      lockMode = 'change_new1';
+      document.getElementById('lock-subtitle').textContent = 'Yeni PIN\'i girin';
+      document.getElementById('sd0').classList.add('active');
+      document.getElementById('sd1').classList.remove('active');
+      updateDots();
+    }
+  }
+}
+
+function unlockApp() {
+  setTimeout(exitLockScreen, 150);
+}
+function exitLockScreen() {
+  document.getElementById('lock-screen').classList.add('hidden');
+  document.getElementById('change-btn').style.display = 'inline-block';
+}
+function showLockScreen() {
+  const ls = document.getElementById('lock-screen');
+  ls.classList.remove('hidden');
+  pinBuffer = ''; pinSetup1 = ''; updateDots(); hideMsg();
+}
+
+function forgotPIN() {
+  if (!confirm('PIN\'inizi sıfırlamak tüm verileri siler. Devam edilsin mi?')) return;
+  localStorage.clear();
+  items = [];
+  render();
+  pinBuffer = ''; pinSetup1 = '';
+  lockMode = 'setup1';
+  document.getElementById('lock-title').textContent = 'PIN Oluşturun';
+  document.getElementById('lock-subtitle').textContent = 'Yeni bir 6 haneli PIN oluşturun';
+  document.getElementById('lock-icon').textContent = '🔐';
+  document.getElementById('step-indicator').style.display = 'flex';
+  document.getElementById('sd0').classList.add('active');
+  document.getElementById('sd1').classList.remove('active');
+  document.getElementById('forgot-btn').style.display = 'none';
+  showLockScreen();
+}
+
+function changePIN() {
+  pinBuffer = ''; pinSetup1 = '';
+  lockMode = 'change_verify';
+  document.getElementById('lock-title').textContent = 'PIN Değiştir';
+  document.getElementById('lock-subtitle').textContent = 'Mevcut PIN\'inizi girin';
+  document.getElementById('lock-icon').textContent = '🔑';
+  document.getElementById('step-indicator').style.display = 'none';
+  document.getElementById('forgot-btn').style.display = 'inline-block';
+  showLockScreen();
+  updateDots(); hideMsg();
+}
+
+// ── Init PIN ─────────────────────────────────────────────────
+(function initPIN() {
+  const stored = getPin();
+  if (!stored) {
+    // First time — setup flow
+    lockMode = 'setup1';
+    document.getElementById('lock-title').textContent = 'PIN Oluşturun';
+    document.getElementById('lock-subtitle').textContent = 'Yeni bir 6 haneli PIN oluşturun';
+    document.getElementById('lock-icon').textContent = '🔐';
+    document.getElementById('step-indicator').style.display = 'flex';
+    document.getElementById('forgot-btn').style.display = 'none';
+  } else {
+    lockMode = 'unlock';
+    // Check if still locked from failed attempts
+    const until = getLockUntil();
+    if (until && Date.now() < until) startLockCountdown(until);
+  }
+  // Keyboard support on lock screen
+  document.addEventListener('keydown', e => {
+    const ls = document.getElementById('lock-screen');
+    if (ls.classList.contains('hidden')) return;
+    if (e.key >= '0' && e.key <= '9') numPress(e.key);
+    if (e.key === 'Backspace') numDel();
+  });
+})();
+
+// ── Init ─────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
