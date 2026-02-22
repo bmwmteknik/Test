@@ -488,9 +488,23 @@
     <button class="num-btn del-btn" onclick="numDel()">⌫</button>
   </div>
 
+  <div id="faceid-btn-wrap" style="margin-top:28px;display:none">
+    <button onclick="triggerBiometric()" id="faceid-btn" style="
+      background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);
+      color:#fff;cursor:pointer;border-radius:20px;padding:14px 32px;
+      font-family:inherit;font-size:1rem;font-weight:700;
+      display:flex;align-items:center;gap:10px;
+      backdrop-filter:blur(8px);
+      transition:background .2s,transform .15s;
+    ">
+      <span style="font-size:1.6rem">🔐</span> Face ID / Touch ID ile Giriş
+    </button>
+  </div>
+
   <div class="lock-footer">
     <button class="lock-link" id="forgot-btn" onclick="forgotPIN()">PIN'i sıfırla</button>
     <button class="lock-link" id="change-btn" onclick="changePIN()" style="display:none">PIN'i değiştir</button>
+    <button class="lock-link" id="biometric-toggle" onclick="toggleBiometric()" style="display:none"></button>
   </div>
 </div>
 
@@ -982,6 +996,7 @@ function showLockScreen() {
   const ls = document.getElementById('lock-screen');
   ls.classList.remove('hidden');
   pinBuffer = ''; pinSetup1 = ''; updateDots(); hideMsg();
+  updateBioUI();
 }
 
 function forgotPIN() {
@@ -1013,6 +1028,108 @@ function changePIN() {
   updateDots(); hideMsg();
 }
 
+// ── Biometric (Face ID / Touch ID) ──────────────────────────
+const BIO_KEY        = 'notdefterim_bio';       // 'enabled' | ''
+const BIO_CRED_KEY   = 'notdefterim_credid';    // base64 credential id
+
+function bioEnabled() { return localStorage.getItem(BIO_KEY) === 'enabled'; }
+function webAuthnSupported() { return !!(window.PublicKeyCredential); }
+
+// Show/hide Face ID button depending on mode & support
+function updateBioUI() {
+  const wrap   = document.getElementById('faceid-btn-wrap');
+  const toggle = document.getElementById('biometric-toggle');
+  const supported = webAuthnSupported();
+
+  if (lockMode === 'unlock' && supported) {
+    if (bioEnabled()) {
+      wrap.style.display   = 'flex';
+      toggle.style.display = 'inline-block';
+      toggle.textContent   = 'Face ID\'yi kapat';
+    } else {
+      wrap.style.display   = 'none';
+      toggle.style.display = 'inline-block';
+      toggle.textContent   = 'Face ID ile aç';
+    }
+  } else {
+    wrap.style.display   = 'none';
+    toggle.style.display = 'none';
+  }
+}
+
+// Convert ArrayBuffer ↔ base64
+function ab2b64(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function b642ab(b64) {
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer;
+}
+
+// Register a new biometric credential
+async function registerBiometric() {
+  if (!webAuthnSupported()) { showMsg('Tarayıcınız desteklemiyor.', 'temp'); return; }
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId    = crypto.getRandomValues(new Uint8Array(16));
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge,
+      rp:   { name: 'Not Defterim' },
+      user: { id: userId, name: 'user', displayName: 'Kullanıcı' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        userVerification: 'required'
+      },
+      timeout: 60000,
+    }});
+    // Store credential id
+    localStorage.setItem(BIO_CRED_KEY, ab2b64(cred.rawId));
+    localStorage.setItem(BIO_KEY, 'enabled');
+    showMsg('Face ID / Touch ID etkinleştirildi! ✅', 'temp');
+    updateBioUI();
+  } catch(e) {
+    if (e.name !== 'NotAllowedError') showMsg('Kayıt başarısız: ' + e.message, 'temp');
+  }
+}
+
+// Authenticate with biometric
+async function triggerBiometric() {
+  if (!webAuthnSupported() || !bioEnabled()) return;
+  const credIdB64 = localStorage.getItem(BIO_CRED_KEY);
+  if (!credIdB64) { showMsg('Önce Face ID\'yi kaydedin.', 'temp'); return; }
+
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    await navigator.credentials.get({ publicKey: {
+      challenge,
+      allowCredentials: [{ type: 'public-key', id: b642ab(credIdB64) }],
+      userVerification: 'required',
+      timeout: 60000,
+    }});
+    // Success — unlock
+    await flashDots('success');
+    unlockApp();
+  } catch(e) {
+    if (e.name === 'NotAllowedError') {
+      showMsg('Face ID iptal edildi.', 'temp');
+    } else {
+      showMsg('Kimlik doğrulanamadı.', 'temp');
+    }
+  }
+}
+
+// Toggle biometric on/off
+async function toggleBiometric() {
+  if (bioEnabled()) {
+    localStorage.removeItem(BIO_KEY);
+    localStorage.removeItem(BIO_CRED_KEY);
+    updateBioUI();
+    showMsg('Face ID kapatıldı.', 'temp');
+  } else {
+    await registerBiometric();
+  }
+}
+
 // ── Init PIN ─────────────────────────────────────────────────
 (function initPIN() {
   const stored = getPin();
@@ -1029,6 +1146,11 @@ function changePIN() {
     // Check if still locked from failed attempts
     const until = getLockUntil();
     if (until && Date.now() < until) startLockCountdown(until);
+  }
+  updateBioUI();
+  // Auto-trigger Face ID if enabled
+  if (lockMode === 'unlock' && bioEnabled()) {
+    setTimeout(triggerBiometric, 400);
   }
   // Keyboard support on lock screen
   document.addEventListener('keydown', e => {
